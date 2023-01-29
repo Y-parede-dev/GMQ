@@ -1,0 +1,7 @@
+Eviter de remettre la meme musique(video)
+afficher les propostion celon les nom de video rentrer
+
+La library
+Bouton mute 
+parametre
+Soit chemin d'acces ou liens d'une drop box 
