@@ -1,6 +1,6 @@
 <html>
 <head>
-    <script src="websocket.js"></script>
+    <script src="../js/websocket.js"></script>
 </head>
 
 <body>
@@ -9,7 +9,7 @@
     </script>
     
     <script>
-      const socket = io('http://localhost:3000');
+      socket = io('http://localhost:3000');
       
       socket.on('newMessage', (message) => {
         console.log(message);
