@@ -1,0 +1,24 @@
+<html>
+<head>
+    <script src="websocket.js"></script>
+</head>
+
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js">
+
+    </script>
+    
+    <script>
+      const socket = io('http://localhost:3000');
+      
+      socket.on('newMessage', (message) => {
+        console.log(message);
+      });
+      
+      function sendMessage() {
+        socket.emit('sendMessage', 'Hello World!');
+      }
+    </script>
+    
+</body>
+</html>
