@@ -5,22 +5,25 @@ const dotenv = require('dotenv');
 dotenv.config();
 const app = express();
 const http = require('http');
-const server = http.createServer(app); // creation du serveur
-const io = require('socket.io')(server)
-// const dataBase = require('./BDD/dbConnect');
-const normalizePort = (val) => { //creation du port Normalizer 
-    const port = parseInt(val, 10);
-    if (isNaN(port)) {
-        return val;
-    };
-    if (port >= 0) {
-        return port;
-    };
-    return false;
-    };
+const server = http.createServer(app);
+const normalizePort = (val) => { 
+  const port = parseInt(val, 10);
+  if (isNaN(port)) {
+    return val;
+  };
+  if (port >= 0) {
+    return port;
+  };
+  return false;
+};
 const port = normalizePort(process.env.PORT);
-app.set('port', port);   // ajout du port sur app 
-const errorHandler = error => {  // gestion des erreurs
+app.set('port', port);
+/**
+ * 
+ * @type {Socket} 
+*/ 
+const io = require('socket.io')(server)
+const errorHandler = error => {
   if (error.syscall !== 'listen') {
     throw error;
   };
@@ -66,7 +69,7 @@ app.use(express.json());
   // app.use("/api", likesRoutes);
   
   //module.exports = app;
-  app.use(express.static('public'));
+app.use(express.static('public'));
 app.get('/', (req, res)=>{
   res.sendFile(path.join(__dirname,'/public/index.html'))
 })
@@ -89,3 +92,43 @@ server.on('listening', () => { //si tout est ok, ecoute l'adresse et on y ajoute
 
 // on applique la fonction listen au server avec le port en argument
 server.listen(port);
+let rooms = [];
+io.on('connection',(socket)=>{
+  
+  console.log(`[connection] ${socket}`)
+  socket.on('userData',(player)=>{
+    console.log(`[playerData] ${player.username}`)
+    let room = null
+
+    if(!player.roomId){
+      room = createRoom(player)
+      console.log(`[create room] - ${room.id} - ${player.username}`)
+    }else{
+      room = rooms.find(r => r.id === player.roomId);
+      if(room === undefined){
+        return
+      }
+      room.players.push(player)
+    }
+    socket.join(room.id)
+    io.to(socket.id).emit('join room', room.id)
+    if(room.players.length === 2){
+      io.to(room.id).emit('start game', room.players);  
+    }
+  })
+  socket.on('get rooms',()=>{
+    io.to(socket.id).emit('list rooms', rooms)
+  })
+})
+const createRoom = (player) => {
+  const room = {id: roomId(), players: []};
+  player.roomId = room.id;
+  room.players.push(player)
+  rooms.push(room);
+
+  return room;
+
+}
+const roomId = () => {
+  return Math.random().toString(36).substring(2, 9);
+}
